@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Performance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .graph-container iframe {
+            width: 100%;
+            height: 500px;
+        }
+        .gauge-container iframe {
+            width: 100%;
+            height: 400px;
+        }
+        .player-box {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-color: #2563EB;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-width: 4px;
+        }
+        .player-box:hover {
+            background-color: #1E40AF;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-6 max-w-5xl">
+        <header class="bg-blue-600 text-white p-4 rounded-lg shadow-md mb-6">
+            <div class="flex items-center justify-between">
+                <a href="{{ url_for('index') }}" class="flex items-center">
+                    <img src="{{ url_for('static', filename='logo.svg') }}" alt="TeamTrack Logo" class="h-8">
+                </a>
+                <nav class="flex space-x-4 items-center">
+                    {% if user_role in ['Coach', 'Admin'] %}
+                    <a
+                        href="{{ url_for('help') }}"
+                        class="text-white hover:text-blue-200 transition duration-200"
+                        aria-label="View help documentation"
+                    >
+                        Help
+                    </a>
+                    <a
+                        href="{{ url_for('settings') }}"
+                        class="text-white hover:text-blue-200 transition duration-200"
+                        aria-label="Manage settings"
+                    >
+                        Settings
+                    </a>
+                    {% endif %}
+                    <a
+                        href="{{ url_for('logout') }}"
+                        class="bg-white text-blue-600 px-4 py-2 rounded-lg border border-blue-600 hover:bg-blue-100 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                        aria-label="Log out of the dashboard"
+                    >
+                        Logout
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        {% if error %}
+            <div class="bg-red-100 text-red-700 p-4 rounded-lg mb-6 text-center">{{ error }}</div>
+        {% endif %}
+
+        <!-- Search Form -->
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-center">Search Player</h2>
+            <form method="POST" class="flex justify-center gap-4">
+                <input type="text" name="player_name" placeholder="Enter player name" required
+                       class="p-2 border border-gray-300 rounded-lg w-2/3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600">Search</button>
+            </form>
+        </section>
+
+        <!-- Player Dashboard -->
+        {% if players %}
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-center">All Players</h2>
+            <!-- Filters -->
+            <form class="flex flex-col sm:flex-row gap-4 mb-6 justify-center">
+                <div>
+                    <label for="injury_filter" class="block text-sm font-medium text-gray-700">Injury Type</label>
+                    <select id="injury_filter" name="injury_filter" onchange="this.form.submit()"
+                            class="mt-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        {% for injury in injury_types %}
+                        <option value="{{ injury }}" {% if injury == current_injury_filter %}selected{% endif %}>{{ injury }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="age_filter" class="block text-sm font-medium text-gray-700">Age Group</label>
+                    <select id="age_filter" name="age_filter" onchange="this.form.submit()"
+                            class="mt-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        {% for age in age_groups %}
+                        <option value="{{ age }}" {% if age == current_age_filter %}selected{% endif %}>{{ age }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+            <!-- Player Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+                {% for player in players %}
+                <form method="POST">
+                    <input type="hidden" name="player_name" value="{{ player.name }}">
+                    <button type="submit" class="player-box {{ player.border_color }}" aria-label="View {{ player.name }} details">
+                        {{ player.name }}
+                    </button>
+                </form>
+                {% endfor %}
+            </div>
+            <!-- Pagination -->
+            <div class="flex justify-center items-center gap-4">
+                {% if current_page > 1 %}
+                <a href="{{ url_for('index', page=current_page-1, injury_filter=current_injury_filter, age_filter=current_age_filter) }}"
+                   class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Previous</a>
+                {% else %}
+                <span class="bg-gray-300 text-gray-600 px-4 py-2 rounded-lg cursor-not-allowed">Previous</span>
+                {% endif %}
+                <span class="text-gray-700">Page {{ current_page }} of {{ total_pages }}</span>
+                {% if current_page < total_pages %}
+                <a href="{{ url_for('index', page=current_page+1, injury_filter=current_injury_filter, age_filter=current_age_filter) }}"
+                   class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Next</a>
+                {% else %}
+                <span class="bg-gray-300 text-gray-600 px-4 py-2 rounded-lg cursor-not-allowed">Next</span>
+                {% endif %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Real-Time Data Input Form (Visible to Coaches/Admins) -->
+        {% if player_info and user_role in ['Coach', 'Admin'] %}
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-center">Update Player Data</h2>
+            <form method="POST" action="{{ url_for('update_player_data', page=current_page, injury_filter=current_injury_filter, age_filter=current_age_filter) }}">
+                <input type="hidden" name="player_id" value="{{ player_info['ID'] }}">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="training_load" class="block text-sm font-medium text-gray-700">Training Load</label>
+                        <input type="number" name="training_load" id="training_load" step="0.1" required
+                               class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label for="heart_rate" class="block text-sm font-medium text-gray-700">Heart Rate</label>
+                        <input type="number" name="heart_rate" id="heart_rate" required
+                               class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <button type="submit" class="mt-4 bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 w-full">Update Data</button>
+            </form>
+        </section>
+        {% endif %}
+
+        <!-- Real-Time Recommendations -->
+        {% if player_info and player_info['Recommendations'] %}
+        <section class="bg-yellow-100 p-6 rounded-lg shadow-md mb-6 border-2 border-yellow-400">
+            <h2 class="text-xl font-semibold mb-4 text-center text-yellow-800">Real-Time Recommendations</h2>
+            <ul class="list-disc pl-6 space-y-2 text-gray-800">
+                {% for recommendation in player_info['Recommendations'] %}
+                <li>{{ recommendation }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endif %}
+
+        <!-- Player Info -->
+        {% if player_info %}
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-center">Player Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <p><strong>Name:</strong> {{ player_info['Name'] }}</p>
+                <p><strong>Training Load:</strong> {{ player_info['Training Load'] }}</p>
+                <p><strong>Heart Rate:</strong> {{ player_info['Heart Rate'] }}</p>
+                <p><strong>Past Injuries:</strong> {{ player_info['Past Injuries'] }}</p>
+                <p><strong>Age:</strong> {{ player_info['Age'] }}</p>
+                <p><strong>Weight:</strong> {{ player_info['Weight'] }}</p>
+                <p><strong>Height:</strong> {{ player_info['Height'] }}</p>
+                <p><strong>Predicted Injury:</strong> {{ player_info['Predicted Injury'] }}</p>
+                <p><strong>Injury Probability:</strong> {{ player_info['Injury Probability'] }}</p>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Gauge Chart -->
+        {% if fig4_html %}
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-2 text-center">Injury Risk Probability</h2>
+            <p class="text-sm text-gray-600 mb-4 text-center">This gauge shows the likelihood of injury for the searched player. Green is low risk, yellow is moderate, and red is high.</p>
+            <div class="gauge-container">{{ fig4_html | safe }}</div>
+        </section>
+        {% endif %}
+
+        <!-- Graphs -->
+        {% if fig1_html %}
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-2 text-center">Training Load vs. Heart Rate</h2>
+            <p class="text-sm text-gray-600 mb-4 text-center">This scatter plot shows how training load relates to heart rate across all players. The searched player is highlighted with a star. Use the dropdown to filter by injury type or age group. Hover for details, click and drag to zoom.</p>
+            <div class="graph-container">{{ fig1_html | safe }}</div>
+        </section>
+        {% endif %}
+
+        {% if fig2_html %}
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-2 text-center">Training Load by Injury Type</h2>
+            <p class="text-sm text-gray-600 mb-4 text-center">This box plot shows training load distribution for each injury type. The searched player's training load is marked with a diamond. Use the log scale to compare outliers.</p>
+            <div class="graph-container">{{ fig2_html | safe }}</div>
+        </section>
+        {% endif %}
+
+        {% if fig3_html %}
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-2 text-center">Historical Performance Trends</h2>
+            <p class="text-sm text-gray-600 mb-4 text-center">This line plot tracks the player's training load and heart rate over time. High-risk points are annotated in red. Click a point to see details below.</p>
+            <div class="graph-container">{{ fig3_html | safe }}</div>
+            <div id="line-plot-details" class="mt-4 text-gray-700"></div>
+        </section>
+        {% endif %}
+
+        <!-- Heatmap -->
+        {% if heatmap_html %}
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-2 text-center">Training Load and Heart Rate vs. Injury Type</h2>
+            <p class="text-sm text-gray-600 mb-4 text-center">This heatmap shows the frequency of injury types across binned training load and heart rate values. Darker colors indicate higher counts. Hover for details.</p>
+            <div class="graph-container">{{ heatmap_html | safe }}</div>
+        </section>
+        {% endif %}
+    </div>
+</body>
+</html>

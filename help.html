@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help - Player Performance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-6 max-w-5xl">
+        <header class="bg-blue-600 text-white p-4 rounded-lg shadow-md mb-6">
+            <div class="flex items-center justify-between">
+                <a href="{{ url_for('index') }}" class="flex items-center">
+                    <img src="{{ url_for('static', filename='logo.svg') }}" alt="TeamTrack Logo" class="h-8">
+                </a>
+                <nav class="flex space-x-4 items-center">
+                    {% if user_role in ['Coach', 'Admin'] %}
+                    <a
+                        href="{{ url_for('help') }}"
+                        class="text-white hover:text-blue-200 transition duration-200"
+                        aria-label="View help documentation"
+                    >
+                        Help
+                    </a>
+                    <a
+                        href="{{ url_for('settings') }}"
+                        class="text-white hover:text-blue-200 transition duration-200"
+                        aria-label="Manage settings"
+                    >
+                        Settings
+                    </a>
+                    {% endif %}
+                    <a
+                        href="{{ url_for('logout') }}"
+                        class="bg-white text-blue-600 px-4 py-2 rounded-lg border border-blue-600 hover:bg-blue-100 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                        aria-label="Log out of the dashboard"
+                    >
+                        Logout
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-center">Help & Documentation</h2>
+            <div class="space-y-6 text-gray-700">
+                <h3 class="text-lg font-medium">Step-by-Step Guide</h3>
+                <ol class="list-decimal pl-6 space-y-2">
+                    <li><strong>Log In</strong>: Use your username and password to access the dashboard. Sign up if you don't have an account.</li>
+                    <li><strong>Search for a Player</strong>: Enter a player's name (e.g., "L.Messi") in the search bar to view their data, injury predictions, and recommendations.</li>
+                    <li><strong>Update Data (Coaches/Admins)</strong>: Input real-time training load and heart rate to get updated predictions and recommendations.</li>
+                    <li><strong>Review Recommendations</strong>: Check the yellow "Real-Time Recommendations" section for actionable advice based on player data.</li>
+                    <li><strong>Analyze Graphs</strong>: View visualizations like "Training Load vs Heart Rate" and "Historical Performance Trends" to understand trends.</li>
+                    <li><strong>Manage Settings (Coaches/Admins)</strong>: Go to the Settings page to add/delete users or customize graph visibility.</li>
+                </ol>
+
+                <h3 class="text-lg font-medium">Roles and Permissions</h3>
+                <p>
+                    - <strong>Users</strong>: View player data and recommendations.<br>
+                    - <strong>Coaches</strong>: Update player data and access settings.<br>
+                    - <strong>Admins</strong>: Full access, including user management.
+                </p>
+
+                <h3 class="text-lg font-medium">Contact Support</h3>
+                <p>If you need assistance, use the form below to contact our support team.</p>
+                <form method="POST" action="#" class="space-y-4">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            required
+                            class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Your name"
+                        >
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Your email"
+                        >
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+                        <textarea
+                            id="message"
+                            name="message"
+                            required
+                            class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            rows="4"
+                            placeholder="Describe your issue"
+                        ></textarea>
+                    </div>
+                    <button
+                        type="submit"
+                        class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        Send Message
+                    </button>
+                </form>
+                <p class="mt-2 text-sm text-gray-600">Note: Contact form functionality will be implemented in a future update.</p>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

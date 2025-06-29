@@ -1,0 +1,26 @@
+ID,Name,training_load,heart_rate,past_injuries,age,Weight,Height,injury_type
+1,L.Messi,1.2,130,10,37,72,170,none
+2,C.Ronaldo,1.5,140,15,40,85,187,Muscle Injury
+3,Neymar,1.8,150,20,33,68,175,Knee Injury
+4,K.Mbappe,1.0,120,5,26,73,178,none
+5,R.Lewandowski,1.3,135,12,36,80,185,Ankle Sprain
+6,H.Kane,1.6,145,18,31,89,188,Hamstring Strain
+7,V.Van Dijk,1.1,125,8,34,92,193,none
+8,K.De Bruyne,1.4,138,14,33,70,181,Muscle Injury
+9,M.Salah,1.7,148,16,32,71,175,Knee Injury
+10,E.Haaland,0.9,115,3,24,88,194,none
+11,L.Suarez,1.9,155,25,38,83,182,Hamstring Strain
+12,A.Di Maria,1.2,132,11,37,69,180,Ankle Sprain
+13,T.Muller,1.3,136,13,35,76,186,none
+14,B.Silva,1.5,142,9,30,67,173,Muscle Injury
+15,J.Kimmich,1.0,123,7,30,73,177,none
+16,P.Dybala,1.6,147,17,31,68,177,Knee Injury
+17,R.Sterling,1.4,139,10,30,69,170,Ankle Sprain
+18,J.Sancho,1.2,128,6,25,76,180,none
+19,A.Robben,1.8,152,22,41,80,180,Hamstring Strain
+20,G.Bale,1.7,149,19,35,82,185,Muscle Injury
+21,T.Kroos,1.1,126,8,35,76,183,none
+22,L.Modric,1.3,134,12,39,66,172,Ankle Sprain
+23,C.Pulisic,1.5,141,9,26,69,172,Muscle Injury
+24,F.De Jong,1.2,129,7,28,74,180,none
+25,P.Pogba,1.6,146,15,32,84,191,Knee Injury

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Player Performance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-6 max-w-5xl">
+        <header class="bg-blue-600 text-white p-4 rounded-lg shadow-md mb-6">
+            <div class="flex items-center justify-between">
+                <a href="{{ url_for('index') }}" class="flex items-center">
+                    <img src="{{ url_for('static', filename='logo.svg') }}" alt="TeamTrack Logo" class="h-8">
+                </a>
+                <nav class="flex space-x-4 items-center">
+                    <a
+                        href="{{ url_for('help') }}"
+                        class="text-white hover:text-blue-200 transition duration-200"
+                        aria-label="View help documentation"
+                    >
+                        Help
+                    </a>
+                    <a
+                        href="{{ url_for('settings') }}"
+                        class="text-white hover:text-blue-200 transition duration-200"
+                        aria-label="Manage settings"
+                    >
+                        Settings
+                    </a>
+                    <a
+                        href="{{ url_for('logout') }}"
+                        class="bg-white text-blue-600 px-4 py-2 rounded-lg border border-blue-600 hover:bg-blue-100 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+                        aria-label="Log out of the dashboard"
+                    >
+                        Logout
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <section class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4 text-center">Settings</h2>
+            <div class="space-y-8">
+                {% if user_role == 'Admin' %}
+                <div>
+                    <h3 class="text-lg font-medium mb-4">User Management</h3>
+                    <form method="POST" class="space-y-4 mb-6">
+                        <input type="hidden" name="add_user" value="1">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                required
+                                class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="New username"
+                            >
+                        </div>
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                required
+                                class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="New password"
+                            >
+                        </div>
+                        <div>
+                            <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+                            <select
+                                id="role"
+                                name="role"
+                                required
+                                class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="User">User</option>
+                                <option value="Coach">Coach</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        <button
+                            type="submit"
+                            class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            Add User
+                        </button>
+                    </form>
+
+                    <h4 class="text-md font-medium mb-2">Current Users</h4>
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border p-2 text-left">Username</th>
+                                <th class="border p-2 text-left">Role</th>
+                                <th class="border p-2 text-left">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td class="border p-2">{{ user.username }}</td>
+                                <td class="border p-2">{{ user.role }}</td>
+                                <td class="border p-2">
+                                    {% if user.username != session['username'] %}
+                                    <form method="POST" class="inline">
+                                        <input type="hidden" name="delete_user" value="1">
+                                        <input type="hidden" name="delete_username" value="{{ user.username }}">
+                                        <button
+                                            type="submit"
+                                            class="text-red-500 hover:text-red-700"
+                                            onclick="return confirm('Are you sure you want to delete {{ user.username }}?')"
+                                        >
+                                            Delete
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-gray-500">Current User</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <div>
+                    <h3 class="text-lg font-medium mb-4">Dashboard Preferences</h3>
+                    <form method="POST" class="space-y-4">
+                        <input type="hidden" name="update_preferences" value="1">
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="show_graph1"
+                                name="show_graph1"
+                                {% if preferences.show_graph1 %}checked{% endif %}
+                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            >
+                            <label for="show_graph1" class="ml-2 text-sm text-gray-700">Show Training Load vs. Heart Rate Graph</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="show_graph2"
+                                name="show_graph2"
+                                {% if preferences.show_graph2 %}checked{% endif %}
+                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            >
+                            <label for="show_graph2" class="ml-2 text-sm text-gray-700">Show Training Load Distribution Graph</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="show_graph3"
+                                name="show_graph3"
+                                {% if preferences.show_graph3 %}checked{% endif %}
+                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            >
+                            <label for="show_graph3" class="ml-2 text-sm text-gray-700">Show Historical Performance Trends Graph</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                id="show_graph4"
+                                name="show_graph4"
+                                {% if preferences.show_graph4 %}checked{% endif %}
+                                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            >
+                            <label for="show_graph4" class="ml-2 text-sm text-gray-700">Show Injury Risk Probability Gauge</label>
+                        </div>
+                        <button
+                            type="submit"
+                            class="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                            Save Preferences
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
